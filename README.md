@@ -1,2 +1,2 @@
 # articles
-Variaous articles
+Various articles
