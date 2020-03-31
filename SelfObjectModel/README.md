@@ -1,4 +1,4 @@
-# Object model of Self
+# The object model of Self
 
 Self was the first programing language that came with the concept of prototypes. Self fully gets by only with objects composed of slots, delegation between them and code assigned to objects. Of these ingredients, it manages to form a very powerful and flexible object model. This article is about the way how it does it. It has no ambitions to be an introduction to this interesting programing language; we will focus only on this small but important part that deserves the attention of everyone who wants to know more about the object-oriented programing.
 
