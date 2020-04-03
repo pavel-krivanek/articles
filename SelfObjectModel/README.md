@@ -1,18 +1,18 @@
 # The object model of Self
 
-Self was the first programing language that came with the concept of prototypes. Self fully gets by only with objects composed of slots, delegation between them and code assigned to objects. Of these ingredients, it manages to form a very powerful and flexible object model. This article is about the way how it does it. It has no ambitions to be an introduction to this interesting programing language; we will focus only on this small but important part that deserves the attention of everyone who wants to know more about the object-oriented programing.
+Self was the first programing language that came with the concept of prototypes. Self fully gets by only with objects composed of slots, delegation between them and code assigned to objects. Of these ingredients, it manages to form a very powerful and flexible object model. This article is about the way how it does it. It has no ambitions to be an introduction to this interesting programing language; we will focus only on this small but important part that deserves the attention of everyone who wants to know more about object-oriented programing.
 
 Today, the most used programing language based on prototypes is JavaScript. Unfortuantelly, it does not make a good name to this class of languages, so many people look through fingers at it. But Self proves that this approach is very versatile.
 
-Objects in Self are composed of slots, which are named references. Self distinguishes several types of slots as data slots, argument slots, parent slots or slots referencing methods. Besides, it has several auxiliary kinds of slots, some of them, paradoxically, do not need to have a name.
+Objects in Self are composed of slots, which are named references. Self distinguishes several types of slots: data slots, argument slots, parent slots or slots referencing methods. Besides, it has several auxiliary kinds of slots. Some of them, paradoxically, do not need to have a name.
 
-The delegation is a straightforward mechanism. When we send a message to an object, the virtual machine tries to find a slot in it with a name that corresponds to the message name. When this slot is a data slot, the result of this message is an object referenced by this slot. When the virtual machine does not find any fitting slot, it starts to search in objects that are referenced by parent slots of the given object. If the founded slot contains a method, the code of this method is executed in the context of the object that is receiver of the message.
+The delegation is a straightforward mechanism. When we send a message to an object, the virtual machine tries to find a slot in it with a name that corresponds to the message name. When this slot is a data slot, the result of this message is an object referenced by this slot. When the virtual machine does not find any fitting slot, it starts to search in objects that are referenced by parent slots of the given object. If the slot found contains a method, the code of this method is executed in the context of the object that received the message.
 
-With the help of delegation, the shared behavior of objects is implemented, so it replaces classes that Self does not use. Let's have, for example, an object named `traits point` that provides behavior of all points. It is an analogue of class with one difference. It does not specify any data items. Next to this object, let's have another object (we will name it `point prototype`) that is a pattern for points that we create. In our case, it contains data slots named `x` and `y` with default value `0`. This object contains a parent slot named `parent` which references the object with shared behavior (`traits point`). Names of parent slots end with star character.
+With the help of delegation, the shared behavior of objects is implemented, so it replaces classes that Self does not use. Let's have, for example, an object named `traits point` that provides behavior of all points. It is an analogue of a class with one difference. It does not specify any data items. Next to this object, let's have another object (we will name it `point prototype`) that is a pattern for points that we create. In our case, it contains data slots named `x` and `y` with default value `0`. This object contains a parent slot named `parent` which references the object with shared behavior (`traits point`). Names of parent slots end with a star character.
 
 ![self](img/self01.png)
 
-At the moment when we want to create a new point, we have two options. The most simple one is to take the prototype and clone it. The new object will contain new independent data slots with a copy of values in the prototype, but, at the same time, it will have the same behavior as the prototype.
+When we want to create a new point, we have two options: The most simple one is to take the prototype and clone it. The new object will contain new independent data slots with a copy of values in the prototype, but, at the same time, it will have the same behavior as the prototype.
 
 The second option is to send to the prototype a message `copyX:Y:`. It knows it because the object with the shared behavior `traits prototype` contains a corresponding method. This method performs the cloning of the prototype and fills the data slots of the new object with values provided as the message arguments. It plays the role of a constructor.
 
@@ -20,35 +20,35 @@ The question is where the object of the shared behavior (the trait) finds the pr
 
 ![self](img/self02.png)
 
-When an object needs to create a point, it sends the message `point` to itself. Because it does not understand it directly, it delegates it to `lobby` which does not understand it too, so it delegates it via the parent slots `globals` to another object that understands it well, and returns the point prototype as the result. From this point object, we then make our own point with demanded coordinates using the message `copyX:Y:`.
+When an object needs to create a point, it sends the message `point` to itself. Because it does not understand it directly, it delegates it to `lobby` which does not understand it too, so it delegates it via the parent slots in `globals` to another object that understands it well, and returns the point prototype as the result. From this point object, we then make our own point with the demanded coordinates using the message `copyX:Y:`.
 
-Every object creates its own namespace. Such structure is not forced and, in the memory, you can have as many independent systems of objects as you wish. In Self, there is no real global object.
+Every object creates its own namespace. Such structure is not forced and, in memory, you can have as many independent systems of objects as you wish. There is no real global object in Self.
 
-Much more interesting is the way how Self manages methods. Method are, again, objects with slots. They have some associated code. For simplicity, we may presume that it contains only several trivial bytecode instructions: `pushSelf`, `send`, `resend`, `pop` and `returnTop` (we will disregard directed resend). It is important to be aware of the fact that a code of a method is always performed in context of the object that contains the code. Not in the context of the method that sends the message.
+Much more interesting is how Self manages methods. Method are, again, objects with slots. They have some associated code. For simplicity, we may presume that they contain only several trivial bytecode instructions: `pushSelf`, `send`, `resend`, `pop` and `returnTop` (we will disregard directed resend). It is important to be aware of the fact that the code of a method is always performed in context of the object that contains the code. Not in the context of the method that sends the message.
 
-Let's have an example of an object that has two data slots named `x` and `a`. Besides, it contains a slot named `mul:` referencing a method that multiplies its argument `arg` with value of the slot `a`. This method has an argument slot that is filled with a concrete value by the virtual machine in the moment of invocation of the method. Next, it includes a slot named `self` that is an argument slot as well and parent slot at the same time. This slot plays an important role during the method invocation.
+Let's have an example of an object that has two data slots named `x` and `a`. It also contains a slot named `mul:` referencing a method that multiplies its argument `arg` with the value of slot `a`. This method has an argument slot that is filled with a concrete value by the virtual machine in the moment of invocation of the method. Next, it includes a slot named `self` that is an argument slot and parent slot at the same time. This slot plays an important role during the method invocation.
 
 ![self](img/self03.png)
 
-Let's say we will send a message `mul: x` to our object so we will want to obtain a result of multiplication of `x` and `a`. The virtual machine then tries to find a slot named `mul:` in this object, and it will find it. It is referencing a method. Because it is a method, the VM does not return the found object directly, but it performs several operations. First, it clones the method object and it creates a new object named method activation object.
+Let's say we send a message `mul: x` to our object to obtain the result of the multiplication of `x` and `a`. The virtual machine then tries to find a slot named `mul:` in this object and finds it. It is referencing a method. Because it is a method, the VM does not return the found object directly, but it performs several operations. First, it clones the method object and creates a new object called a method activation object.
 
 ![self](img/self04.png)
 
-Then, into the parent argument slot `self`, the VM inserts a reference to an object in which context the method should be performed. I recal, do not forget that it will be actually performed in the context of the method with code - so in the method activation object.
+Then the VM inserts a reference to an object into the parent argument slot `self`, in the context of which the method should be performed. I recap: Do not forget that it will actually be performed in the context of the method with code - so in the method activation object.
 
 ![self](img/self05.png)
 
-Next, the virtual machine fills the arguments slots. In our case, the slot `arg` in the method activation object will point to the same object as the slot `x`, to the number two.
+Next, the virtual machine fills the argument slots. In our case, the slot `arg` in the method activation object will point to the same object as the slot `x`: the number two.
 
 ![self](img/self06.png)
 
-In the following step, the VM will start to execute the method code. First, it inserts the method activation object on top of the stack (`pushSelf`). Then it sends the message `arg` to the object at the top of the stack. It understands it because it has a slot of the same name (the argument slot). We remove the message receiver from the stack, and we insert the method call result, the number two. We push the method activation object again (pushSelf) and send a message `a` to it. Because it does not find the corresponding slot, it continues in delegation on the parent slots, `self` in our case. It will find it (in the object that is the receiver of the message) and inserts the result, the number three, there (after removing of the receiver from the stack). Then it sends the message for multiplication (`send *`) to the object of number three. It will leave the result on top of the stack that we use as an overall message send result.
+In the following step, the VM will start to execute the method's code. First, it pushes the method activation object on top of the stack (`pushSelf`). Then it sends the message `arg` to the object at the top of the stack. The object understands it because it has a slot of the same name (the argument slot). We remove the message receiver from the stack, and we insert the method call result, the number two. We push the method activation object again (`pushSelf`) and send a message `a` to it. Because it does not find the corresponding slot, it continues in delegation on the parent slots, `self` in our case. It will find it (in the object that received the message) and inserts the result, the number three, there (after removing the receiver from the stack). Then it sends the message for multiplication (`send *`) to the object of number three. It will leave the result on top of the stack that we use as an overall message send result.
 
 In case we have an object that does not contain the method directly, but it delegates it via the parent slot, the process is the very same.
 
 ![self](img/self07.png)
 
-Here the VM obtains the method activation object first by cloning of the method object. Argument parent slot `self` references the message receiver, so the method activation object has access to all its slots via delegation. Notice that  `self` is named slot so if the object sents `self` to itself, it is a standard message with the same processing mechanism as the other messages. It is not a pseudo-variable as in the case of Smalltalk.
+Here the VM obtains the method activation object first by cloning of the method object. The argument and parent slot `self` references the message receiver, so the method activation object has access to all its slots via delegation. Notice that `self` is a named slot so if the object sends `self` to itself, it is a standard message with the same processing mechanism as the other messages. It is not a pseudo-variable as in the case of Smalltalk.
 
 ![self](img/self08.png)
 
