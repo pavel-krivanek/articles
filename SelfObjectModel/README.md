@@ -2,7 +2,7 @@
 
 Self was the first programing language that came with the concept of prototypes. Self fully gets by only with objects composed of slots, delegation between them and code assigned to objects. Of these ingredients, it manages to form a very powerful and flexible object model. This article is about the way how it does it. It has no ambitions to be an introduction to this interesting programing language; we will focus only on this small but important part that deserves the attention of everyone who wants to know more about the object-oriented programing.
 
-Today, the most used programing language based on prototypes is JavaScript. Unfortuantelly, it does not make a good name to this class of languages, so many people look through fingers at it. But Self proves that this approach is very versatile.
+Today, the most used programing language based on prototypes is JavaScript. Unfortunately, it does not make a good name to this class of languages, so many people look through fingers at it. But Self proves that this approach is very versatile.
 
 Objects in Self are composed of slots, which are named references. Self distinguishes several types of slots as data slots, argument slots, parent slots or slots referencing methods. Besides, it has several auxiliary kinds of slots, some of them, paradoxically, do not need to have a name.
 
